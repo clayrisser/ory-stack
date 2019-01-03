@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  keto:
+    image: oryd/keto
+    ports:
+      - 4466:4466
+    environment:
+      DATABASE_URL: memory
+    command: serve
