@@ -21,6 +21,7 @@ services:
 
   oathkeeper-proxy:
     image: oryd/oathkeeper
+    network_mode: host
     ports:
       - 4455:4455
     depends_on:
@@ -29,15 +30,15 @@ services:
       - keto
     environment:
       AUTHENTICATOR_ANONYMOUS_USERNAME: anonymous
-      AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL: http://hydra:4444/oauth2/token
-      AUTHENTICATOR_OAUTH2_INTROSPECTION_URL: http://hydra:4445/oauth2/introspect
-      AUTHORIZER_KETO_WARDEN_KETO_URL: http://keto:4466
+      AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL: http://localhost:4444/oauth2/token
+      AUTHENTICATOR_OAUTH2_INTROSPECTION_URL: http://locahost:4445/oauth2/introspect
+      AUTHORIZER_KETO_WARDEN_KETO_URL: http://locahost:4466
       CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM: ory-hydra
-      CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL: http://hydra:4445
+      CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL: http://localhost:4445
       CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID: resources:hydra:jwk:oathkeeper
-      CREDENTIALS_ISSUER_ID_TOKEN_ISSUER: http://oathkeeper-api:4456
+      CREDENTIALS_ISSUER_ID_TOKEN_ISSUER: http://localhost:4456
       DATABASE_URL: memory
-      OATHKEEPER_API_URL: http://oathkeeper-api:4456
+      OATHKEEPER_API_URL: http://localhost:4456
       PORT: 4455
     command:
       serve proxy
