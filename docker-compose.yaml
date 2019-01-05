@@ -1,17 +1,22 @@
 version: '2'
 
 services:
+  identity_api:
+    image: codejamninja/simple-reverse-proxy:latest
+    environment:
+      PORT: 3000
+      UPSTREAM: http://dockerhost:3000
+
   hydra:
     image: oryd/hydra:v1.0.0-beta.9
-    network_mode: host
     ports:
       - 4444:4444
       - 4445:4445
     environment:
       DATABASE_URL: memory
-      OAUTH2_CONSENT_URL: http://localhost:3000/hydra/consent
-      OAUTH2_ISSUER_URL: http://localhost:4444
-      OAUTH2_LOGIN_URL: http://localhost:3000/hydra/login
+      OAUTH2_CONSENT_URL: http://identity_api:3000/hydra/consent
+      OAUTH2_ISSUER_URL: http://hydra:4444
+      OAUTH2_LOGIN_URL: http://identity_api:3000/hydra/login
     command:
       serve all --dangerous-force-http
 
@@ -25,7 +30,6 @@ services:
 
   oathkeeper-proxy:
     image: oryd/oathkeeper
-    network_mode: host
     ports:
       - 4455:4455
     depends_on:
@@ -34,18 +38,18 @@ services:
       - keto
     environment:
       AUTHENTICATOR_ANONYMOUS_USERNAME: anonymous
-      AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL: http://localhost:4444/oauth2/token
+      AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL: http://hydra:4444/oauth2/token
       AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID: some-client
       AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET: some-secret
       AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE: some-scope
-      AUTHENTICATOR_OAUTH2_INTROSPECTION_URL: http://locahost:4445/oauth2/introspect
-      AUTHORIZER_KETO_WARDEN_KETO_URL: http://localhost:4466
+      AUTHENTICATOR_OAUTH2_INTROSPECTION_URL: http://hydra:4445/oauth2/introspect
+      AUTHORIZER_KETO_WARDEN_KETO_URL: http://keto:4466
       CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM: ory-hydra
-      CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL: http://localhost:4445
+      CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL: http://hydra:4445
       CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID: resources:hydra:jwk:oathkeeper
-      CREDENTIALS_ISSUER_ID_TOKEN_ISSUER: http://localhost:4456
+      CREDENTIALS_ISSUER_ID_TOKEN_ISSUER: http://oathkeeper-api:4456
       DATABASE_URL: memory
-      OATHKEEPER_API_URL: http://localhost:4456
+      OATHKEEPER_API_URL: http://oathkeeper-api:4456
       PORT: 4455
     command:
       serve proxy
@@ -69,3 +73,13 @@ services:
       PORT: 4456
     command:
       serve api
+
+  bastion:
+    image: alpine:latest
+    command: tail -f /dev/null
+
+  dockerhost:
+    image: qoomon/docker-host:latest
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
