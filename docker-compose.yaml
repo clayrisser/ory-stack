@@ -14,9 +14,9 @@ services:
       - 4445:4445
     environment:
       DATABASE_URL: memory
-      OAUTH2_CONSENT_URL: http://identity_api:3000/hydra/consent
-      OAUTH2_ISSUER_URL: http://hydra:4444
-      OAUTH2_LOGIN_URL: http://identity_api:3000/hydra/login
+      OAUTH2_CONSENT_URL: http://localhost:3000/hydra/consent
+      OAUTH2_ISSUER_URL: http://localhost:4444
+      OAUTH2_LOGIN_URL: http://localhost:3000/hydra/login
     command:
       serve all --dangerous-force-http
 
