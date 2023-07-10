@@ -6,6 +6,7 @@
 
 Please ★ this repo if you found it useful ★ ★ ★
 
+![](assets/ory-stack.png)
 
 ## Features
 
